@@ -157,6 +157,7 @@ public class Algorithms {
         List<Point2D>[] endPts = determinant(end, maxPt, points);
         // dokud to jde volej startHull 
         // přepisuji si body - ale o úroveň výše
+        
         // pak se objeví po konci rekurzí
         Point2D[] startHull = qh(start, maxPt, startPts[1]);
         // pak volej endhull 
