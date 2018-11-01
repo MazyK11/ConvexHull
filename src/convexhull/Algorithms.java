@@ -23,7 +23,92 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author mazurd
  */
 public class Algorithms {
-       
+    
+    public static Path2D minimumAreaEnclosingBox(Point2D [] p){
+        Path2D rectg = new Path2D.Double();
+        Point2D minX = p[0];
+        Point2D maxX = p[0];
+        Point2D minY = p[0];
+        Point2D maxY = p[0];
+        // max a min
+        for (Point2D pt : p) {
+            if (pt.getX() < minX.getX()) {
+                minX = pt;
+            }
+            if (pt.getX() > maxX.getX()) {
+                maxX = pt;
+            }
+            if (pt.getY() < minY.getY()) {
+                minY = pt;
+            }
+            if (pt.getY() > maxY.getY()) {
+                maxY = pt;
+            }
+        }
+        
+        // délka mezi extrémy
+        double d1 = distanceBetweenTwoPoints(minX,maxX);
+        double d2 = distanceBetweenTwoPoints(minY,maxY);
+        // fík a fíj       
+        double fj = angle(minY.getX() - maxY.getX(),minY.getY() - maxY.getY(),
+                0,minY.getY() - maxY.getY());       
+        double fk = angle(minX.getX() - maxX.getX(),minX.getY() - maxX.getY(),
+                minX.getX() - maxX.getX(),0);
+        // plocha
+        double l1 = abs(d1 * Math.cos((fj*180)/Math.PI));
+        double l2 = abs(d2 * Math.cos((fk*180)/Math.PI));      
+        double A =l1 * l2; 
+        System.out.println(A);
+        
+        double Amin = A; double SumaT = 0;
+        
+        while(SumaT < Math.PI/4){
+            double delty [] = deltaAngels(minX,maxX,minY,maxY);
+            double delta = delty[0];
+            for(int i = 0;i<4;i++){
+                if (delta > delty[i]){
+                    delta = delty[i];
+                } 
+            }
+            
+            
+            
+            double l1new = abs(d1 * Math.cos(((fj*180)/Math.PI) - delta));
+            double l2new = abs(d1 * Math.cos(((fk*180)/Math.PI) - delta));
+            double Anew = l1new * l2new; 
+            
+            SumaT = SumaT + delta;
+        }
+        
+        
+        
+        
+        
+        return rectg;
+    }
+    
+    private static double distanceBetweenTwoPoints(Point2D a, Point2D b){
+        return sqrt((a.getX() - b.getX())*(a.getX() - b.getX()) + 
+                (a.getY() - b.getY())*(a.getY() - b.getY()));
+    }
+    
+    
+    private static double [] deltaAngels(Point2D minX, Point2D maxX, Point2D minY,
+            Point2D maxY){
+        double [] d = new double[4];
+        
+
+        return d;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     //method, which counts the dot product
     public static double dotProd(double ux,double uy,double vx,double vy){
         return ux*vx + uy*vy;
@@ -41,7 +126,7 @@ public class Algorithms {
     }
     
     
-    public static Path2D jarvisScan(Point2D [] p){
+    public static Path2D jarvisScan(Point2D [] p, drawPanel d){
         Path2D poly = new Path2D.Double();
         LinkedList<Point2D> polyPoints =  new LinkedList<>();
         Point2D miny = p[0];
@@ -91,8 +176,10 @@ public class Algorithms {
                 break;
             }
         }
+        d.recpt = new Point2D [polyPoints.size()-1];
         for (int i = 1;i < polyPoints.size();i++){
             poly.lineTo(polyPoints.get(i).getX(),polyPoints.get(i).getY());
+            d.recpt[i-1] = polyPoints.get(i);
         }
         // line to si pamatuje co má spojit za body - přidáváme ještě jednou první bod
         poly.lineTo(polyPoints.get(1).getX(),polyPoints.get(1).getY());

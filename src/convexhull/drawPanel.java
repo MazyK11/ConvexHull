@@ -21,11 +21,14 @@ public class drawPanel extends javax.swing.JPanel {
 
     protected Point2D [] point;
     protected Path2D poly;
-   
+    protected Point2D [] recpt;
+    protected Path2D rec;
     
     public drawPanel() {
         point = new Point2D [0]; 
         poly = new Path2D.Double();
+        recpt = new Point2D [0]; 
+        rec = new Path2D.Double();
         initComponents();
         setBorder(BorderFactory.createLineBorder(Color.black));
         setBackground(Color.white);

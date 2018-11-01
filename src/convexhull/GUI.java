@@ -44,6 +44,7 @@ public class GUI extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         bLabel = new javax.swing.JLabel();
         QuickHall = new javax.swing.JButton();
+        rec = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -112,6 +113,13 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        rec.setText("Min Rectangle");
+        rec.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                recActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -137,7 +145,8 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(pointCountField, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(CB, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(QuickHall, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(rec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(drawPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -167,7 +176,9 @@ public class GUI extends javax.swing.JFrame {
                             .addComponent(bLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(genertbut, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(61, 61, 61)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(rec, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(QuickHall, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 160, Short.MAX_VALUE))
                     .addComponent(drawPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -190,7 +201,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_pointsButtonActionPerformed
 
     private void jarvisButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jarvisButtonActionPerformed
-     drawPanel1.poly = Algorithms.jarvisScan(drawPanel1.point);
+     drawPanel1.poly = Algorithms.jarvisScan(drawPanel1.point,this.drawPanel1);
      drawPanel1.repaint();
     }//GEN-LAST:event_jarvisButtonActionPerformed
 
@@ -228,6 +239,10 @@ public class GUI extends javax.swing.JFrame {
         drawPanel1.poly = Algorithms.quickHull(drawPanel1.point);
         drawPanel1.repaint();
     }//GEN-LAST:event_QuickHallActionPerformed
+
+    private void recActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recActionPerformed
+        drawPanel1.rec = Algorithms.minimumAreaEnclosingBox(drawPanel1.recpt);
+    }//GEN-LAST:event_recActionPerformed
 
     
     /**
@@ -279,5 +294,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton jarvisButton;
     private javax.swing.JTextField pointCountField;
     private javax.swing.JButton pointsButton;
+    private javax.swing.JButton rec;
     // End of variables declaration//GEN-END:variables
 }
