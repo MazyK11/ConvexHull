@@ -53,13 +53,19 @@ public class drawPanel extends javax.swing.JPanel {
             }
         }
         gfx.setColor(Color.RED);
-        if (poly != null){
-            AffineTransform at = AffineTransform.getScaleInstance(width,-height);
-            poly.transform(at);
-            at = AffineTransform.getTranslateInstance(0, height);
-            poly.transform(at);
-            gfx.draw(poly);
-        }
+        AffineTransform at = AffineTransform.getScaleInstance(width,-height);
+        poly.transform(at);
+        at = AffineTransform.getTranslateInstance(0, height);
+        poly.transform(at);
+        gfx.draw(poly);
+        
+        gfx.setColor(Color.BLUE);
+        AffineTransform bt = AffineTransform.getScaleInstance(width,-height);
+        rec.transform(bt);
+        bt = AffineTransform.getTranslateInstance(0, height);
+        rec.transform(bt);
+        gfx.draw(rec);
+        
     }
     /**
      * This method is called from within the constructor to initialize the form.

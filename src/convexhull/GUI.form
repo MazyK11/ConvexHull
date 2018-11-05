@@ -129,8 +129,11 @@
     </Component>
     <Component class="javax.swing.JTextField" name="pointCountField">
       <Properties>
-        <Property name="text" type="java.lang.String" value="100"/>
+        <Property name="text" type="java.lang.String" value="10"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pointCountFieldActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="Graham">
       <Properties>

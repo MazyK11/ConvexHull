@@ -26,79 +26,151 @@ public class Algorithms {
     
     public static Path2D minimumAreaEnclosingBox(Point2D [] p){
         Path2D rectg = new Path2D.Double();
-        Point2D minX = p[0];
-        Point2D maxX = p[0];
-        Point2D minY = p[0];
-        Point2D maxY = p[0];
+        Point2D minX = p[0]; Point2D maxX = p[0];
+        Point2D minY = p[0]; Point2D maxY = p[0];
+        // pole pro body, které násedují po extrémních bodech - pro počítání
+        // úhlů 
+        Point2D [] nextPts = new Point2D [4];
         // max a min
+        Point2D nextPt;
+        int i = 1;
         for (Point2D pt : p) {
-            if (pt.getX() < minX.getX()) {
+            
+            if (i >= p.length){
+                nextPt = p[0];
+            }
+            else {
+                nextPt = p[i];
+            }
+            
+            if (pt.getX() <= minX.getX()) {
                 minX = pt;
+                nextPts[0] = nextPt;
             }
-            if (pt.getX() > maxX.getX()) {
+            if (pt.getX() >= maxX.getX()) {
                 maxX = pt;
+                nextPts[1] = nextPt;
             }
-            if (pt.getY() < minY.getY()) {
+            if (pt.getY() <= minY.getY()) {
                 minY = pt;
+                nextPts[2] = nextPt;
             }
-            if (pt.getY() > maxY.getY()) {
+            if (pt.getY() >= maxY.getY()) {
                 maxY = pt;
+                nextPts[3] = nextPt;
             }
+            i++;
         }
-        
-        // délka mezi extrémy
-        double d1 = distanceBetweenTwoPoints(minX,maxX);
-        double d2 = distanceBetweenTwoPoints(minY,maxY);
+
         // fík a fíj       
         double fj = angle(minY.getX() - maxY.getX(),minY.getY() - maxY.getY(),
                 0,minY.getY() - maxY.getY());       
         double fk = angle(minX.getX() - maxX.getX(),minX.getY() - maxX.getY(),
                 minX.getX() - maxX.getX(),0);
+ 
+//        fj = (fj*180)/Math.PI;
+//        fk = (fk*180)/Math.PI; 
+
+        // rohy obdélníku
+        Point2D [] corners = new Point2D[4];
+        corners[0] = new Point2D.Double(minX.getX(),minY.getY());
+        corners[1] = new Point2D.Double(maxX.getX(),maxY.getY());
+        corners[2] = new Point2D.Double(maxX.getX(),minY.getY());
+        corners[3] = new Point2D.Double(minX.getX(),maxY.getY());
+        // kopie rohů
+        Point2D [] c = corners;
+        
+         // délka mezi extrémy  - strany obdélníku
+        double l1 = maxX.getX() - minX.getX();
+        double l2 = maxY.getY() - minY.getY();
         // plocha
-        double l1 = abs(d1 * Math.cos((fj*180)/Math.PI));
-        double l2 = abs(d2 * Math.cos((fk*180)/Math.PI));      
-        double A =l1 * l2; 
-        System.out.println(A);
+        double A = l1 * l2;
+//        System.out.println(A);
         
-        double Amin = A; double SumaT = 0;
-        
+        double Amin = A; double SumaT = 0; double rot = 0;double Aprev = A;
+        // algoritmus
         while(SumaT < Math.PI/4){
-            double delty [] = deltaAngels(minX,maxX,minY,maxY);
-            double delta = delty[0];
-            for(int i = 0;i<4;i++){
-                if (delta > delty[i]){
-                    delta = delty[i];
-                } 
-            }
+            // nalezení delta min
+            double t = deltamin(minX,maxX,minY,maxY,nextPts,corners);
+            double d = (t*180)/Math.PI;
+            // počítat strany? jak zmenšit ten rotovaný obdélník?
             
+            // otočení obdélníku
+            corners = rotate(corners,t);
             
-            
-            double l1new = abs(d1 * Math.cos(((fj*180)/Math.PI) - delta));
-            double l2new = abs(d1 * Math.cos(((fk*180)/Math.PI) - delta));
-            double Anew = l1new * l2new; 
-            
-            SumaT = SumaT + delta;
+            System.out.println(t);
+            // výpočet plochy? podle vzorce v prezentaci
+            double sin = Math.sin(t);
+            double cos = Math.cos(t);
+            double Anew  = Aprev*(Math.pow(cos,2) + 
+                    (Math.tan(fk) - Math.tan(fj))* Math.cos(t) *Math.sin(t) - 
+                    Math.tan(fk)*Math.tan(fj)*(Math.pow(sin,2)));
+
+            if (abs(Anew) < Amin){
+                Amin = Anew;
+                rot = rot + t;
+            }       
+            SumaT = SumaT + d;
+            Aprev = Anew;
         }
-        
-        
-        
-        
-        
+        System.out.println(rot);
+        // otoč rohy na výsledný obdélník
+        c = rotate(c,rot);
+   
+        rectg.moveTo(c[0].getX(),c[0].getY());
+        rectg.lineTo(c[2].getX(),c[2].getY());
+        rectg.lineTo(c[1].getX(),c[1].getY());
+        rectg.lineTo(c[3].getX(),c[3].getY());
+        rectg.lineTo(c[0].getX(),c[0].getY());
+
         return rectg;
     }
     
-    private static double distanceBetweenTwoPoints(Point2D a, Point2D b){
-        return sqrt((a.getX() - b.getX())*(a.getX() - b.getX()) + 
-                (a.getY() - b.getY())*(a.getY() - b.getY()));
+    private static Point2D [] rotate(Point2D [] corners,double rotate){
+        Point2D [] newPts = new Point2D[4];
+        
+        double centerX = (corners[0].getX() + corners[1].getX())/2;
+        double centerY = (corners[0].getY() + corners[1].getY())/2;
+        
+        for(int i = 0;i<4;i++){
+            double newX = centerX + (corners[i].getX()-centerX)*Math.cos(rotate) - 
+                                    (corners[i].getY()-centerY)*Math.sin(rotate);
+            double newY = centerY + (corners[i].getX()-centerX)*Math.sin(rotate) + 
+                                    (corners[i].getY()-centerY)*Math.cos(rotate);
+           newPts[i] = new Point2D.Double(newX,newY);
+        }
+        
+        return newPts;
     }
     
-    
-    private static double [] deltaAngels(Point2D minX, Point2D maxX, Point2D minY,
-            Point2D maxY){
-        double [] d = new double[4];
+//    private static double distanceBetweenTwoPoints(Point2D a, Point2D b){
+//        return sqrt((a.getX() - b.getX())*(a.getX() - b.getX()) + 
+//                (a.getY() - b.getY())*(a.getY() - b.getY()));
+//    }
+      
+    private static double deltamin(Point2D minX, Point2D maxX, Point2D minY,
+            Point2D maxY, Point2D [] nextPts, Point2D [] corners){
+        double t = 0;
+        Point2D [] maxMin = {minX,maxX,minY,maxY};
         
+        double mint = Double.MAX_VALUE; 
+        double ux; double uy; double vx; double vy;
+//        System.out.println("uhly");
+        for (int i = 0;i<nextPts.length;i++){
+            
+            ux = nextPts[i].getX()-maxMin[i].getX();
+            uy = nextPts[i].getY()-maxMin[i].getY();
+            vx = corners[i].getX()-maxMin[i].getX();
+            vy = corners[i].getY()-maxMin[i].getY();
 
-        return d;
+            t = angle(ux,uy,vx,vy);
+//            System.out.println((t*180)/Math.PI);
+            if (t < mint){
+                mint = t;
+            }
+        }
+//        System.out.println("konec");
+        return mint;
     }
     
     
@@ -176,10 +248,10 @@ public class Algorithms {
                 break;
             }
         }
-        d.recpt = new Point2D [polyPoints.size()-1];
-        for (int i = 1;i < polyPoints.size();i++){
+        d.recpt = new Point2D [polyPoints.size()-2];
+        for (int i = 2;i < polyPoints.size();i++){
             poly.lineTo(polyPoints.get(i).getX(),polyPoints.get(i).getY());
-            d.recpt[i-1] = polyPoints.get(i);
+            d.recpt[i-2] = polyPoints.get(i);
         }
         // line to si pamatuje co má spojit za body - přidáváme ještě jednou první bod
         poly.lineTo(polyPoints.get(1).getX(),polyPoints.get(1).getY());

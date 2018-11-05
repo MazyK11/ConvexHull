@@ -73,7 +73,12 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        pointCountField.setText("100");
+        pointCountField.setText("10");
+        pointCountField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pointCountFieldActionPerformed(evt);
+            }
+        });
 
         Graham.setText("Graham");
         Graham.addActionListener(new java.awt.event.ActionListener() {
@@ -241,8 +246,14 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_QuickHallActionPerformed
 
     private void recActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recActionPerformed
+        drawPanel1.poly = Algorithms.jarvisScan(drawPanel1.point,this.drawPanel1);
         drawPanel1.rec = Algorithms.minimumAreaEnclosingBox(drawPanel1.recpt);
+        drawPanel1.repaint();
     }//GEN-LAST:event_recActionPerformed
+
+    private void pointCountFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pointCountFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pointCountFieldActionPerformed
 
     
     /**
