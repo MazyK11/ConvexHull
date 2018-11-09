@@ -10,8 +10,10 @@ import java.awt.geom.Point2D;
 import static java.lang.Math.abs;
 import static java.lang.Math.sqrt;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Stack;
@@ -23,6 +25,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author mazurd
  */
 public class Algorithms {
+    
+    public static final double EPSILON = 0.0001;
+    public enum OrientationEnum {CW,COLINEAR,CCW}
     
     public static Path2D minimumAreaEnclosingBox(Point2D [] p){
         Path2D rectg = new Path2D.Double();
@@ -173,13 +178,115 @@ public class Algorithms {
         return mint;
     }
     
+    public static OrientationEnum getOrientation(Point2D p1, Point2D p2, Point2D p3){
+         double val = (p2.getY() - p1.getY()) * (p3.getX() - p2.getX()) - 
+                  (p2.getX() - p1.getX()) * (p3.getY() - p2.getY()); 
+         if (abs(val) < EPSILON){
+             return OrientationEnum.COLINEAR;
+         }else if (val > 0){
+             return OrientationEnum.CW;
+         }else {
+             return OrientationEnum.CCW;
+         }
+    }
+        
+    public static Path2D sweepHull(Point2D [] points){
+        Path2D hull;
+        hull = new Path2D.Double();
+        // parametry -> Double compare(souřadnice X)
+        Arrays.sort(points, (Point2D p1, Point2D p2) -> Double.compare(p1.getX(), p2.getX()));
+        
+        List<Point2D> upperHull;
+        List<Point2D> lowerHull;
+        
+        upperHull = new LinkedList<>();
+        lowerHull = new LinkedList<>();
+        // přidám prvky do konvexních obálek
+        for (Point2D pt: points){
+            upperHull.add(pt);
+            lowerHull.add(pt);
+        }
+        // fixnu konvexitu - void jelikož používám iterator
+        fixConvexity(upperHull, OrientationEnum.CW);
+        fixConvexity(lowerHull, OrientationEnum.CCW);
+        
+        // přidám do path
+        hull.moveTo(lowerHull.get(0).getX(), lowerHull.get(0).getY());
+        
+        for (Point2D pt : lowerHull){
+            hull.lineTo(pt.getX(), pt.getY());
+        }
+        // otočím pole horní obálky, aby to bylo správně spojený
+        Collections.reverse(upperHull);
+        
+        for (Point2D pt : upperHull){
+            hull.lineTo(pt.getX(), pt.getY());
+        }
+        
+        return hull;
+    }
     
-    
-    
-    
-    
-    
-    
+    public static void fixConvexity(List<Point2D> points,OrientationEnum orientation){
+        if (points.size() < 3){
+            // void jelikož nešahám do listu ale pomocí iterátoru ho měním
+            return;
+        }
+        ListIterator<Point2D> iterator;
+        // iterátor - pracuje s prvky (boxy v listu) - umí next
+        iterator = points.listIterator();
+        Point2D prev;
+        Point2D cur;
+        Point2D next;
+        prev = iterator.next();
+        cur = iterator.next();
+        next = iterator.next();
+
+        // jeď
+        while (true){
+            if (getOrientation(prev,cur,next) == orientation){
+                prev = cur;
+                cur = next;
+                if (! iterator.hasNext()){
+                    break;
+                }
+                next = iterator.next();
+                continue;
+            }
+            // iterátor je v mezerách
+            // next
+            iterator.previous();
+            // cur
+            iterator.previous();
+            // delete cur
+            iterator.remove();
+            
+            // před prev
+            iterator.previous();
+            // ! kdyý už nemůže jít dál (prev)
+            if (!iterator.hasPrevious()){
+                // před prev
+                iterator.next();
+                // za cur 
+                cur = iterator.next();
+                if (! iterator.hasNext()){
+                    break;
+                }
+                // za next
+                next = iterator.next();   
+            }
+            else{
+            // zpátky za prev 
+            iterator.next();
+            // nastavím cur a prev
+            cur = iterator.previous();
+            prev = iterator.previous();
+            // vrátím se zpátky do nextu
+            iterator.next();
+            iterator.next();
+            iterator.next();
+            }
+        }    
+    }
     
     //method, which counts the dot product
     public static double dotProd(double ux,double uy,double vx,double vy){
@@ -213,7 +320,7 @@ public class Algorithms {
         // move to - kvůli path posuň se na ten první bod aby věděla odkud kreslit
         poly.moveTo(miny.getX(),miny.getY());
         
-        polyPoints.add(new Point2D.Double(0,miny.getY()));
+        polyPoints.add(new Point2D.Double(1,miny.getY()));
         polyPoints.add(miny);
         
         Point2D curPT = miny;
@@ -223,6 +330,7 @@ public class Algorithms {
             // mění se jen jednou vektor
             double ux = prevpt.getX() - curPT.getX();
             double uy = prevpt.getY() - curPT.getY();
+            
             Point2D minPT = null;
             for(Point2D pp: p){
                 if (pp == curPT || pp == prevpt){
@@ -234,7 +342,7 @@ public class Algorithms {
                 // výsledný úhel
                 double min = angle(ux,uy,vx,vy);
                 // pokud je výsledný úhel nižší něž dosavadný 
-                if (start > min){
+                if (start >= min){
                     // start je min 
                     start = min;
                     // pamatuji minpt

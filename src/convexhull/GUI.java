@@ -45,6 +45,8 @@ public class GUI extends javax.swing.JFrame {
         bLabel = new javax.swing.JLabel();
         QuickHall = new javax.swing.JButton();
         rec = new javax.swing.JButton();
+        line = new javax.swing.JButton();
+        time = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -74,11 +76,6 @@ public class GUI extends javax.swing.JFrame {
         });
 
         pointCountField.setText("10");
-        pointCountField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                pointCountFieldActionPerformed(evt);
-            }
-        });
 
         Graham.setText("Graham");
         Graham.addActionListener(new java.awt.event.ActionListener() {
@@ -125,6 +122,20 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        line.setText("SweepLine");
+        line.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lineActionPerformed(evt);
+            }
+        });
+
+        time.setText("Time");
+        time.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -145,13 +156,15 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(bLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(b, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(rec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pointCountField, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(CB, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(QuickHall, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(rec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(time, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(line, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pointCountField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(CB, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(QuickHall, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(drawPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -185,7 +198,11 @@ public class GUI extends javax.swing.JFrame {
                         .addComponent(rec, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(QuickHall, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 160, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(line, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(time, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 36, Short.MAX_VALUE))
                     .addComponent(drawPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -251,11 +268,91 @@ public class GUI extends javax.swing.JFrame {
         drawPanel1.repaint();
     }//GEN-LAST:event_recActionPerformed
 
-    private void pointCountFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pointCountFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_pointCountFieldActionPerformed
+    private void lineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lineActionPerformed
+        drawPanel1.poly = Algorithms.sweepHull(drawPanel1.point);
+        drawPanel1.repaint();
+    }//GEN-LAST:event_lineActionPerformed
 
+    private void timeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeActionPerformed
+        final int gridfrom = 10;
+        final int gridto = 1000;
+        
+        final int sizefrom = 10;
+        final int sizeto = 1_000_000;
+        System.out.println("Grid");
+        for (int size = gridfrom; size < gridto; size+=10){
+            Point2D [] grid = generateGrid(size);
+            benchMark(grid);
+        }
+        System.out.println("Random");
+        for(int size = sizefrom; size < sizeto; size *=1.1){
+            Point2D [] grid = generateRandom(size);
+            benchMark(grid);
+        }
+        System.out.println("Circle");
+        for(int size = sizefrom; size < sizeto; size *=1.1){
+            Point2D [] grid = generateCircle(size);
+            benchMark(grid);
+        }
+    }//GEN-LAST:event_timeActionPerformed
+
+    private Point2D [] generateRandom(int size){
+        int npoints = Integer.parseInt(pointCountField.getText());
+        
+        Point2D [] points = new Point2D[npoints];
+        Random rnd = new Random();
+        for (int i = 0;i<npoints;i++){
+            points[i] = new Point2D.Double(rnd.nextDouble(),rnd.nextDouble());
+        }
+        
+        return points;
+    }
     
+    private Point2D [] generateGrid(int size){
+        Point2D [] grid;
+        grid = new Point2D.Double[size*size];
+        for(int x = 0;x<size;x++){
+            for(int y = 0;y<size;y++){
+                // x* size + y -> místo [][] vlastně funguje jako odkaz na 
+                // matici
+                grid[x*size+y] = new Point2D.Double(1.0/size*x,1.0/size*y);
+            }
+        }
+        return grid;
+    }
+    
+    private Point2D [] generateCircle(int size){
+        Point2D [] points = new Point2D[size]; 
+        Random rnd;
+        rnd = new Random();
+        for(int i = 0;i<size;i++){
+            double rand = rnd.nextDouble()*2*Math.PI;
+            double x = Math.cos(rand)/2 + 0.5;
+            double y = Math.sin(rand)/2 + 0.5;
+            points[i] = new Point2D.Double(x,y);
+        }
+        
+        return points;
+    }
+    
+    private void benchMark(Point2D [] grid){
+        long startTime = System.nanoTime();
+        Algorithms.jarvisScan(grid,this.drawPanel1);
+        long endTime = System.nanoTime();
+        long jarvisTime = endTime -startTime;
+        
+        startTime = System.nanoTime();
+        Algorithms.quickHull(grid);
+        endTime = System.nanoTime();
+        long quickTime = endTime -startTime;
+        
+        startTime = System.nanoTime();
+        Algorithms.sweepHull(grid);
+        endTime = System.nanoTime();
+        long sweepTime = endTime -startTime;
+        
+        System.out.format("%d,%d,%d,%d \n",grid.length,jarvisTime/1000,quickTime/1000,sweepTime/1000);
+    }
     /**
      * @param args the command line arguments
      */
@@ -303,8 +400,10 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JButton jarvisButton;
+    private javax.swing.JButton line;
     private javax.swing.JTextField pointCountField;
     private javax.swing.JButton pointsButton;
     private javax.swing.JButton rec;
+    private javax.swing.JButton time;
     // End of variables declaration//GEN-END:variables
 }
