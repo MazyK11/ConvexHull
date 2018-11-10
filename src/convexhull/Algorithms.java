@@ -304,6 +304,11 @@ public class Algorithms {
         return Math.acos(skalarsoucin/(ulen*vlen));
     }
     
+    private static double dist(Point2D a, Point2D b){
+        return sqrt((a.getX() - b.getX())*(a.getX() - b.getX()) + 
+                (a.getY() - b.getY())*(a.getY() - b.getY()));
+    }
+    
     
     public static Path2D jarvisScan(Point2D [] p, drawPanel d){
         Path2D poly = new Path2D.Double();
@@ -319,8 +324,8 @@ public class Algorithms {
         // 0 0 kvůli přímce(úhel vektory) následně vyhodím 
         // move to - kvůli path posuň se na ten první bod aby věděla odkud kreslit
         poly.moveTo(miny.getX(),miny.getY());
-        
-        polyPoints.add(new Point2D.Double(1,miny.getY()));
+        // stejné souřadnice jako náš startovní bod akorát (x-1) -> nenastane chyba 
+        polyPoints.add(new Point2D.Double(miny.getX()-1,miny.getY()));
         polyPoints.add(miny);
         
         Point2D curPT = miny;
@@ -342,12 +347,22 @@ public class Algorithms {
                 // výsledný úhel
                 double min = angle(ux,uy,vx,vy);
                 // pokud je výsledný úhel nižší něž dosavadný 
-                if (start >= min){
+                if (start > min){
                     // start je min 
                     start = min;
                     // pamatuji minpt
                     minPT = pp;
                 }
+                // pokud je úhel stejný, záleží na vzdálenosti bodů
+                else if(start == min){          
+                    double a = dist(curPT,minPT);
+                    double b = dist(curPT,pp);
+                    // přidám vzdálenější
+                    if(a < b){
+                        minPT = pp;
+                    }
+                }
+                
             }
             polyPoints.add(minPT);
             prevpt = curPT;

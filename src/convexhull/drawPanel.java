@@ -25,7 +25,7 @@ public class drawPanel extends javax.swing.JPanel {
     protected Path2D rec;
     
     public drawPanel() {
-        point = new Point2D [0]; 
+        point = new Point2D[0]; 
         poly = new Path2D.Double();
         recpt = new Point2D [0]; 
         rec = new Path2D.Double();
@@ -39,7 +39,7 @@ public class drawPanel extends javax.swing.JPanel {
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D gfx = (Graphics2D)g;
-        
+                
         int width = this.getWidth();
         int height = this.getHeight();
         
